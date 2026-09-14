@@ -1,0 +1,14 @@
+{
+  "name": "toc-trucking-services-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TOC Trucking Services — business website (static HTML/CSS/JS, zero dependencies)",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "node build.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
