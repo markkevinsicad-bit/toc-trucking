@@ -1,12 +1,12 @@
 /**
  * Minimal zero-dependency static file server for local development.
- * Serves the contents of the public/ directory.
+ * Uses only Node's built-in http/fs/path modules — no npm packages required.
  */
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.join(__dirname, 'public');
+const ROOT = __dirname;
 const PORT = process.env.PORT || 5173;
 
 const MIME_TYPES = {
@@ -25,22 +25,16 @@ const MIME_TYPES = {
 };
 
 function send404(res) {
-  res.writeHead(404, {
-    'Content-Type': 'text/plain; charset=UTF-8'
-  });
+  res.writeHead(404, { 'Content-Type': 'text/plain; charset=UTF-8' });
   res.end('404 Not Found');
 }
 
 const server = http.createServer((req, res) => {
   let urlPath = decodeURIComponent(req.url.split('?')[0]);
+  if (urlPath === '/') urlPath = '/index.html';
 
-  if (urlPath === '/') {
-    urlPath = '/index.html';
-  }
-
+  // Resolve safely within ROOT to prevent path traversal
   const filePath = path.normalize(path.join(ROOT, urlPath));
-
-  // Prevent path traversal
   if (!filePath.startsWith(ROOT)) {
     return send404(res);
   }
@@ -49,15 +43,9 @@ const server = http.createServer((req, res) => {
     if (err || !stats.isFile()) {
       return send404(res);
     }
-
     const ext = path.extname(filePath).toLowerCase();
-    const contentType =
-      MIME_TYPES[ext] || 'application/octet-stream';
-
-    res.writeHead(200, {
-      'Content-Type': contentType
-    });
-
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': contentType });
     fs.createReadStream(filePath).pipe(res);
   });
 });
@@ -65,7 +53,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log('');
   console.log('  TOC Trucking Services — dev server running');
-  console.log('  Local: http://localhost:' + PORT);
+  console.log('  Local:  http://localhost:' + PORT);
   console.log('');
   console.log('  Press Ctrl+C to stop.');
   console.log('');
